@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pinnacle AI Autocorrect Tool</title>
+    <style>
+        /* standard layout styling */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #111;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #555;
+        }
+
+        textarea {
+            width: 95%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 15px;
+            resize: none;
+        }
+
+        .counter {
+            text-align: right;
+            font-size: 12px;
+            color: #888;
+            margin-top: 5px;
+        }
+
+        .btn-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 15px;
+            font-weight: bold;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        #btn-correct {
+            flex: 1;
+            background-color: #007bff;
+            color: white;
+        }
+
+        #btn-correct:hover {
+            background-color: #0056b3;
+        }
+
+        #btn-clear {
+            background-color: #e2e8f0;
+            color: #4a5568;
+        }
+
+        #btn-clear:hover {
+            background-color: #cbd5e1;
+        }
+
+        .output-group {
+            background-color: #f8fafc;
+            padding: 15px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            min-height: 80px;
+            position: relative;
+        }
+
+        #output-box {
+            margin: 0;
+            font-size: 15px;
+            color: #334155;
+        }
+
+        #btn-copy {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 12px;
+            padding: 4px 8px;
+            background: #fff;
+            border: 1px solid #ccc;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Pinnacle AI Autocorrect Tool</h1>
+
+        <!-- input -->
+        <div class="input-group">
+            <label>Type or paste your text here:</label>
+            <textarea id="text-input" rows="5" maxlength="500" placeholder="Enter text here..."></textarea>
+            <div id="char-count" class="counter">0 / 500 characters</div>
+        </div>
+
+        <!-- buttons -->
+        <div class="btn-container">
+            <button id="btn-correct">Correct Text</button>
+            <button id="btn-clear">Clear</button>
+        </div>
+
+        <!-- output -->
+        <div class="output-group">
+            <label style="font-size: 11px; color: #94a3b8; text-transform: uppercase;">AI Corrected Output</label>
+            <p id="output-box" style="font-style: italic; color: #94a3b8;">Output will appear here...</p>
+            <button id="btn-copy">Copy</button>
+        </div>
+    </div>
+
+    <script>
+        const textInput = document.getElementById('text-input');
+        const outputBox = document.getElementById('output-box');
+        const btnCorrect = document.getElementById('btn-correct');
+        const btnClear = document.getElementById('btn-clear');
+        const btnCopy = document.getElementById('btn-copy');
+        const charCount = document.getElementById('char-count');
+
+        // character counter note
+        textInput.addEventListener('input', function() {
+            charCount.textContent = textInput.value.length + ' / 500 characters';
+        });
+
+        // send input to python flask backend
+        btnCorrect.addEventListener('click', async function() {
+            let userText = textInput.value.trim();
+            if (!userText) return;
+
+            btnCorrect.textContent = 'Processing...';
+            btnCorrect.disabled = true;
+
+            try {
+                let response = await fetch('/autocorrect', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: userText })
+                });
+                
+                let data = await response.json();
+                
+                if (data.corrected_text) {
+                    outputBox.textContent = data.corrected_text;
+                    outputBox.style.fontStyle = 'normal';
+                    outputBox.style.color = '#334155';
+                    btnCopy.style.display = 'block'; // show copy button
+                } else {
+                    outputBox.textContent = 'Error processing text.';
+                }
+            } catch (err) {
+                console.log('error fetching api:', err);
+                outputBox.textContent = 'Server connection error.';
+            } finally {
+                btnCorrect.textContent = 'Correct Text';
+                btnCorrect.disabled = false;
+            }
+        });
+
+        // reset the ui
+        btnClear.addEventListener('click', function() {
+            textInput.value = '';
+            outputBox.textContent = 'Output will appear here...';
+            outputBox.style.fontStyle = 'italic';
+            outputBox.style.color = '#94a3b8';
+            btnCopy.style.display = 'none';
+            charCount.textContent = '0 / 500 characters';
+        });
+
+        // copy text logic
+        btnCopy.addEventListener('click', function() {
+            navigator.clipboard.writeText(outputBox.textContent).then(function() {
+                btnCopy.textContent = 'Copied!';
+                setTimeout(function() {
+                    btnCopy.textContent = 'Copy';
+                }, 1500);
+            });
+        });
+    </script>
+</body>
+</html>
