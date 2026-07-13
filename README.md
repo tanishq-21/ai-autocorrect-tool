@@ -1,48 +1,80 @@
 # Pinnacle AI Autocorrect Tool
 
-This web application is pretty straightforward - it takes sentences with bad grammar or ones that are just plain wrong and uses a special AI tool to fix them on its own. The backend is built with Python and Flask, and the frontend is simple, using HTML, CSS, and JavaScript to make it work.
+## A web application that automatically fixes grammar and spelling errors using deep learning.
 
-This project uses a special tool called `t5-base-grammar-correction` from a company called Hugging Face. Normally, you would use a kind of helper tool to make it work, but in this case, the project loads the tool's brain and its special dictionary directly. This helps prevent problems that can happen when the helper tool gets updated, so the project can run without any issues.
+This open-source Python Flask web application serves as an automated grammar checker and English sentence correction tool powered by natural language processing (NLP). By utilizing the Hugging Face Transformers library, this software provides real-time text editing, sentence optimization, and spell-checking capabilities directly within a responsive web UI. If you are looking for an alternative to Grammarly or an AI writing assistant that can fix verb tenses, incorrect prepositions, and structural syntax errors locally, this deep learning application provides an efficient full-stack solution for developers and writers alike.
 
-## Features
-- Full-stack integration combining a Flask backend with a classic HTML frontend.
-- AI-based grammar correction (fixes tenses, spelling, and prepositions).
-- Real-time character counter limited to 500 characters.
-- Clear button to reset the UI and a one-click Copy button to grab the output instantly.
+---
 
-## Project Structure
 ```text
-pinnacle-autocorrect-tool/
-│
-├── app.py               (Flask backend server)
-├── requirements.txt     (Python dependencies)
-├── README.md            (Project documentation)
-└── templates/
-    └── index.html           (Frontend UI)
+[ User Text Input ] 
+       │
+       ▼ (Asynchronous JavaScript fetch() POST Request)
+ ┌──────────────┐
+ │ Flask Server │ ◄─── (Loads t5-base-grammar-correction Model)
+ └──────┬───────┘
+        │
+        ├─► [ AutoTokenizer ]  ──► Converts raw text into numerical tokens
+        ├─► [ Seq2Seq Model ]  ──► Evaluates syntax and predicts corrections
+        └─► [ Decode Output ]  ──► Converts tokens back into clean English text
+        │
+        ▼ (JSON Response Data)
+[ Updated UI Display ]
+```
+---
+Installation & Usage Guide (For Users)
+If you just want to run this application on your local machine to use the tool, follow these straightforward steps:
 
-##Setup and Installation
+1. Download the Project: Download and extract the project zip folder to your computer.
 
-To get started, you'll want to copy or download the entire project folder to your computer.
+2. Open Terminal/Command Prompt: Navigate to the folder where you extracted the project files.
 
-To get started, open a terminal and navigate to your project folder. From there, you'll need to install the necessary Python libraries to move forward with your project.
-
-Bash
+3. Install the Requirements: Run the following command to download the necessary packages:
+```text
 pip install flask transformers torch
-To get the Flask server up and running, you need to execute the main script.
+```
 
-Bash
+4. Launch the Tool: Start the application by running:
+```text
 python app.py
-Once you see "Model loaded!" on the terminal, open a web browser and navigate to the specified address.
+```
 
-Plaintext
-[http://127.0.0.1:5000](http://127.0.0.1:5000)
+5. Open in Browser: Wait until the console says the model is loaded, then open your web browser and go to:
+```text
+http://127.0.0.1:5000
+```
 
+Local Development Setup (For Contributors)
 
-## How It Works under the Hood
+If you want to modify the source code, build features, or debug the application, setup your environment using these guidelines:
 
-Here's how it works on the backend, in the app.py file: the server gets some text from the frontend, breaks it down into smaller parts, and then uses a special tool called AutoModelForSeq2SeqLM to make corrections. After that, it sends the cleaned-up text back to the frontend as a JSON response.
+1. Fork and Clone: Fork this repository to your GitHub account and clone it locally:
+```text
+git clone [https://github.com/YOUR_USERNAME/pinnacle-autocorrect-tool.git](https://github.com/YOUR_USERNAME/pinnacle-autocorrect-tool.git)
+cd pinnacle-autocorrect-tool
+```
 
-Frontend (index.html): Uses standard JavaScript fetch() to send the input text to the backend asynchronously without reloading the page, updating the DOM dynamically once the result arrives.
+2. Environment Isolation: We highly recommend developing inside a virtual environment:
+```text
+python -m venv venv
+# Activate on Windows:
+.\venv\Scripts\activate
+# Activate on Mac/Linux:
+source venv/bin/activate
+```
 
+3. Editable Installation: Install packages and ensure your dependencies are mapped correctly:
+```text
+pip install -r requirements.txt
+```
 
-You're all set now, just save that file and your entire project will be officially documented and ready to move forward.
+Roadmap & Known Issues
+
+Known Issues
+1. Initial Model Download Delay: The first execution requires an ~892MB download of the t5-base-grammar-correction configuration files, which may temporarily freeze execution depending on network bandwidth.
+2. High CPU/RAM Overhead: Running deep learning sequence-to-sequence generation via PyTorch locally can cause latency on lower-end host machines without dedicated GPU acceleration.
+
+Future Roadmap
+1. Implement user toggle options to choose between different model sizes (e.g., small, base, large).
+2. Migrate heavy local model execution to API endpoint handling for lower client-side latency.
+3. Add multi-language text translation and correction capabilities.
