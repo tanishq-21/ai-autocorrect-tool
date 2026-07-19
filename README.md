@@ -1,4 +1,4 @@
-# Pinnacle AI Autocorrect Tool
+# AI Autocorrect Tool
 
 ## A web application that automatically fixes grammar and spelling errors using deep learning.
 
